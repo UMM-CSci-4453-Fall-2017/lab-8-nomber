@@ -51,4 +51,3 @@ function buttonApi($http,apiUrl){
     }
  };
 }
-
