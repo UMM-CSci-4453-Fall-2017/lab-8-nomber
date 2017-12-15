@@ -5,9 +5,14 @@ angular.module('buttons',[])
 
 function ButtonCtrl($scope,buttonApi){
    $scope.buttons=[]; //Initially all was still
+   $scope.list=[];
+   $scope.total=[];
    $scope.errorMessage='';
+   $scope.logMessage='';
+   $scope.deleteItem=deleteItem;
    $scope.isLoading=isLoading;
    $scope.refreshButtons=refreshButtons;
+   $scope.refreshList=refreshList;
    $scope.buttonClick=buttonClick;
 
    var loading = false;
@@ -15,6 +20,16 @@ function ButtonCtrl($scope,buttonApi){
    function isLoading(){
     return loading;
    }
+
+  function deleteItem($event){
+    $scope.errorMessage='';
+    buttonApi.deleteItem(event.target.id)
+       .success(function(){
+         refreshList();
+       })
+       .error(function(){$scope.errorMessage="Unable click";});
+  }
+
   function refreshButtons(){
     loading=true;
     $scope.errorMessage='';
@@ -28,14 +43,44 @@ function ButtonCtrl($scope,buttonApi){
           loading=false;
       });
  }
+
+ function refreshList(){
+   loading=true;
+   $scope.errorMessage='';
+   buttonApi.getList()
+     .success(function(data){
+        $scope.list=data;
+        getTotalAmt();
+        loading=false;
+     })
+     .error(function () {
+         $scope.errorMessage="Unable to load Buttons:  Database request failed";
+         loading=false;
+     });
+  }
+
   function buttonClick($event){
      $scope.errorMessage='';
-     buttonApi.clickButton($event.target.id)
-        .success(function(){})
+     buttonApi.clickButton(event.target.id)
+        .success(function(){
+          refreshList();
+        })
         .error(function(){$scope.errorMessage="Unable click";});
   }
-  refreshButtons();  //make sure the buttons are loaded
 
+  function getTotalAmt(){
+    loading=true;
+    $scope.errorMessage='';
+    buttonApi.totalAmount()
+      .success(function(data){
+        $scope.amount=data[0].TOTAL;
+        loading=false;
+      })
+      .error(function(){$scope.errorMessage="Unable to get total transaction amount";});
+  }
+
+  refreshButtons();
+  refreshList();
 }
 
 function buttonApi($http,apiUrl){
@@ -44,10 +89,25 @@ function buttonApi($http,apiUrl){
       var url = apiUrl + '/buttons';
       return $http.get(url);
     },
-    clickButton: function(id){
-      var url = apiUrl+'/click?id='+id;
-//      console.log("Attempting with "+url);
-      return $http.get(url); // Easy enough to do this way
+    clickButton: function(id, utcDate){
+      var url = apiUrl+'/click?id='+ id + '&time=' + utcDate;
+      console.log("Attempting with "+url);
+      return $http.post(url);
+    },
+    getList: function(){
+      var url = apiUrl + '/list';
+      console.log("Attempting with " + url);
+      return $http.get(url);
+    },
+    deleteItem: function(id){
+      var url = apiUrl + '/delete?id=' + id;
+      console.log("Attempting with "+url);
+      return $http.post(url);
+    },
+    totalAmount: function(){
+      var url = apiUrl + '/total';
+      console.log("Attempting with "+url);
+      return $http.get(url);
     }
  };
 }

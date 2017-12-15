@@ -1,25 +1,50 @@
 <!doctype html>
 <html>
 <head lang="en">
-    <meta charset="utf-8">
-    <title>Cash Register</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
-    <script src="click.js"></script>
+  <meta charset="utf-8">
+  <title>Cash Register</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.4/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="click.js"></script>
 </head>
 <body ng-app="buttons">
-<div class="container-fluid">
+  <div class="container-fluid">
     <h1>Cash Register (with buttons)</h1>
     <div id="buttons" ng-controller="buttonCtrl" >
-       <div ng-repeat="button in buttons">
-         <div style="position:absolute;left:{{button.left}}px;top:{{button.top}}px"><button id="{{button.buttonID}}" ng-click="buttonClick($event,'button.buttonID');" >{{button.label}}</button></div>
-       </div>
-       <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px"} ng-show="errorMessage != ''">
+      <div ng-repeat="button in buttons">
+        <div style="position:absolute;left:{{button.left}}px;top:{{button.top}}px"><button id="{{button.button_id}}" ng-click="buttonClick($event,'button.button_id');" class="btn btn-default">{{button.label}}</button></div>
+      </div>
+      <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px"} ng-show="errorMessage != ''">
+        <div class="col-sm-12">
+          <h3 class="text-danger">{{errorMessage}}</h3>
+        </div>
+      </div>
+      <table style = "position:absolute;right:0px;top:100px" >
+        <tr>
+          <button id="TransactionTable"style="position:fixed;height:50px;top:50px;right:0px;width:500px;font-size:30px"class="btn btn-warning">
+            Current Transaction
+          </button>
+          <tr ng-repeat="item in list" style="top:100px">
+            <td>
+              <button id="{{item.id}}"class="btn btn-default"style ="height:50px;width:500px;font-size:15px"ng-click="deleteItem($event,'item.id');">
+                Item: {{item.name}} Amount: {{item.amount}} Cost: {{item.cost}}
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <button id="totalAmount"style="position:fixed;height:50px;bottom:100px;right:0px;width:500px;font-size:30px" class = "btn btn-warning">
+              Total: {{amount}}
+            </button>
+          </tr>
+        </div>
+        <div style="position:fixed;height:50px;bottom:0px;left:0px;right:0px;margin-bottom:0px"} ng-show="errorMessage != ''">
           <div class="col-sm-12">
-           <h3 class="text-danger">{{errorMessage}}</h3>
-         </div>
-       </div>
-     </div>
-</div>
-</body>
-</html>
+            <h3 class="text-danger">{{errorMessage}}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  </html>

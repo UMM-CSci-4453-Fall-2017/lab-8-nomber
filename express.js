@@ -1,25 +1,25 @@
+Promise=require('bluebird')
+mysql=require('mysql');
+dbf=require('./dbf-setup.js');
+var credentials = require('./credentials.json');
+
 var express=require('express'),
-Promise = require('bluebird'),
-mysql=require('mysql'),
-dbf = require('./dbf-setup.js'),
-credentials=require('./credentials.json'),
 app = express(),
 port = process.env.PORT || 1337;
 
-credentials.host='ids.morris.umn.edu'; //setup database credentials
-
-var connection = mysql.createConnection(credentials); // setup the connection
-
-connection.connect(function(err){if(err){console.log(error)}});
+var buttons = [];
+var list = [];
+var totalAmt = [];
 
 var queryDatabase = function(dbf, sql){
   queryResults = dbf.query(mysql.format(sql));
   return(queryResults);
 }
 
-var fillArray = function(result, arr){
-  arr = result;
-  return(arr);
+
+var fillInArray = function(result, array){
+  array = result;
+  return(array);
 }
 
 var sendToDatabase = function(dbf, sql){
@@ -28,23 +28,48 @@ var sendToDatabase = function(dbf, sql){
 
 app.use(express.static(__dirname + '/public'));
 app.get("/buttons",function(req,res){
-  var sql = 'SELECT * FROM Roch.till_buttons';
-  connection.query(sql,(function(res){return function(err,rows,fields){
-     if(err){console.log("We have an error:");
-             console.log(err);}
-     res.send(rows);
-  }})(res));
+  var sql = "SELECT * FROM " + credentials.user + ".till_buttons";
+  var query = queryDatabase(dbf, sql)
+  .then(fillInArray(buttons))
+  .then(function (buttons) {
+    res.send(buttons);})
+  .catch(function(err){console.log("DANGER:",err)});
 });
+
+app.get("/list",function(req,res){
+  var sql = "SELECT * FROM " + credentials.user + ".transaction";
+  var query = queryDatabase(dbf, sql)
+  .then(fillInArray(list))
+  .then(function (list) {
+    res.send(list);})
+  .catch(function(err){console.log("DANGER:",err)});
+});
+
 
 app.post("/click",function(req,res){
   var id = req.param('id');
-  var sql = 'insert into ' + credentials.user + '.transaction values (' + id + ', (select item from ' + credentials.user + '.inventory where id = ' + id + '), 1, (select prices from ' + credentials.user +
-  '.prices where id = ' + id + ');'
+  var sql = 'insert into ' + credentials.user + '.transaction values (' + id + ', (select item from ' + credentials.user + '.inventory where id = ' + id + '), 1, (select prices from ' + credentials.user + '.prices where id = ' + id + '));'
   console.log("Attempting sql ->"+sql+"<-");
-
   var query = sendToDatabase(dbf, sql);
   res.send();
 });
-// Your other API handlers go here!
+
+
+app.post("/delete", function(req,res){
+  var id = req.param('id');
+  var sql = 'DELETE FROM ' + credentials.user + '.transaction where id = ' + id;
+  var query = sendToDatabase(dbf, sql);
+  res.send();
+});
+
+
+app.get("/total", function(req, res){
+  var sql = 'SELECT SUM(cost) AS TOTAL FROM ' + credentials.user + '.transaction';
+  var query = queryDatabase(dbf, sql)
+  .then(fillInArray(totalAmt))
+  .then(function (totalAmt) {
+    res.send(totalAmt);})
+  .catch(function(err){console.log("DANGER:",err)});
+});
 
 app.listen(port);
