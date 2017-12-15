@@ -7,10 +7,12 @@ var express=require('express'),
 app = express(),
 port = process.env.PORT || 1337;
 
+//Arrays for storing data
 var buttons = [];
 var transaction = [];
 var totalAmt = [];
 
+//sending the query to dbg
 var queryDatabase = function(dbf, sql){
   queryResults = dbf.query(mysql.format(sql));
   return(queryResults);
@@ -20,10 +22,6 @@ var queryDatabase = function(dbf, sql){
 var fillInArray = function(result, array){
   array = result;
   return(array);
-}
-
-var sendToDatabase = function(dbf, sql){
-  dbf.query(mysql.format(sql));
 }
 
 app.use(express.static(__dirname + '/public'));
@@ -36,6 +34,7 @@ app.get("/buttons",function(req,res){
   .catch(function(err){console.log("DANGER:",err)});
 });
 
+//This function gets the current transaction, which is just the transaction table
 app.get("/transaction",function(req,res){
   var sql = "SELECT * FROM " + credentials.user + ".transaction";
   var query = queryDatabase(dbf, sql)
@@ -45,24 +44,25 @@ app.get("/transaction",function(req,res){
   .catch(function(err){console.log("DANGER:",err)});
 });
 
-
+//This function puts the price, amount and item in a table when the button is clicked on
+//If the item is already in the table, it updates the total amount
 app.post("/click",function(req,res){
   var id = req.param('id');
   var sql = 'insert into ' + credentials.user + '.transaction values (' + id + ', (select item from ' + credentials.user + '.inventory where id = ' + id + '), 1, (select prices from ' + credentials.user + '.prices where id = ' + id + ')) ON DUPLICATE KEY UPDATE cost=cost+(select prices from ' + credentials.user + '.prices where id = ' + id + '), amount=amount+1;'
   console.log("Attempting sql ->"+sql+"<-");
-  var query = sendToDatabase(dbf, sql);
+  var query = queryDatabase(dbf, sql);
   res.send();
 });
 
-
+//This function handles the task of deleting the items, I am using a simple querries to get it done
 app.post("/delete", function(req,res){
   var id = req.param('id');
   var sql = 'DELETE FROM ' + credentials.user + '.transaction where id = ' + id;
-  var query = sendToDatabase(dbf, sql);
+  var query = queryDatabase(dbf, sql);
   res.send();
 });
 
-
+//This function gets the total prices from the transaction table, thus the total amount of the current trasanction
 app.get("/total", function(req, res){
   var sql = 'SELECT SUM(cost) AS TOTAL FROM ' + credentials.user + '.transaction';
   var query = queryDatabase(dbf, sql)
