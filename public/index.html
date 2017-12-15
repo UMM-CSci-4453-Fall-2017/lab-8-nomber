@@ -26,10 +26,12 @@
           <button id="TransactionTable"style="position:fixed;height:50px;top:50px;right:0px;width:500px;font-size:30px"class="btn btn-warning">
             Current Transaction
           </button>
-          <tr ng-repeat="item in list" style="top:100px">
+          <tr ng-repeat="item in transaction" style="top:100px">
             <td>
               <button id="{{item.id}}"class="btn btn-default"style ="height:50px;width:500px;font-size:15px"ng-click="deleteItem($event,'item.id');">
-                Item: {{item.name}} Amount: {{item.amount}} Cost: {{item.cost}}
+                  Item: {{item.item}},
+                  Amount: {{item.amount}} <br>
+                  Cost: {{item.cost}}
               </button>
             </td>
           </tr>

@@ -8,7 +8,7 @@ app = express(),
 port = process.env.PORT || 1337;
 
 var buttons = [];
-var list = [];
+var transaction = [];
 var totalAmt = [];
 
 var queryDatabase = function(dbf, sql){
@@ -36,19 +36,19 @@ app.get("/buttons",function(req,res){
   .catch(function(err){console.log("DANGER:",err)});
 });
 
-app.get("/list",function(req,res){
+app.get("/transaction",function(req,res){
   var sql = "SELECT * FROM " + credentials.user + ".transaction";
   var query = queryDatabase(dbf, sql)
-  .then(fillInArray(list))
-  .then(function (list) {
-    res.send(list);})
+  .then(fillInArray(transaction))
+  .then(function (transaction) {
+    res.send(transaction);})
   .catch(function(err){console.log("DANGER:",err)});
 });
 
 
 app.post("/click",function(req,res){
   var id = req.param('id');
-  var sql = 'insert into ' + credentials.user + '.transaction values (' + id + ', (select item from ' + credentials.user + '.inventory where id = ' + id + '), 1, (select prices from ' + credentials.user + '.prices where id = ' + id + '));'
+  var sql = 'insert into ' + credentials.user + '.transaction values (' + id + ', (select item from ' + credentials.user + '.inventory where id = ' + id + '), 1, (select prices from ' + credentials.user + '.prices where id = ' + id + ')) ON DUPLICATE KEY UPDATE cost=cost+(select prices from ' + credentials.user + '.prices where id = ' + id + '), amount=amount+1;'
   console.log("Attempting sql ->"+sql+"<-");
   var query = sendToDatabase(dbf, sql);
   res.send();

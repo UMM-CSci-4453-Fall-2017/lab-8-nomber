@@ -5,7 +5,7 @@ angular.module('buttons',[])
 
 function ButtonCtrl($scope,buttonApi){
    $scope.buttons=[]; //Initially all was still
-   $scope.list=[];
+   $scope.transaction=[];
    $scope.total=[];
    $scope.errorMessage='';
    $scope.logMessage='';
@@ -47,10 +47,10 @@ function ButtonCtrl($scope,buttonApi){
  function refreshList(){
    loading=true;
    $scope.errorMessage='';
-   buttonApi.getList()
+   buttonApi.getTransation()
      .success(function(data){
-        $scope.list=data;
-        getTotalAmt();
+        $scope.transaction=data;
+        getTotalAmount();
         loading=false;
      })
      .error(function () {
@@ -68,7 +68,7 @@ function ButtonCtrl($scope,buttonApi){
         .error(function(){$scope.errorMessage="Unable click";});
   }
 
-  function getTotalAmt(){
+  function getTotalAmount(){
     loading=true;
     $scope.errorMessage='';
     buttonApi.totalAmount()
@@ -85,17 +85,17 @@ function ButtonCtrl($scope,buttonApi){
 
 function buttonApi($http,apiUrl){
   return{
-    getButtons: function(){
-      var url = apiUrl + '/buttons';
-      return $http.get(url);
-    },
     clickButton: function(id, utcDate){
       var url = apiUrl+'/click?id='+ id + '&time=' + utcDate;
       console.log("Attempting with "+url);
       return $http.post(url);
     },
-    getList: function(){
-      var url = apiUrl + '/list';
+    getButtons: function(){
+      var url = apiUrl + '/buttons';
+      return $http.get(url);
+    },
+    getTransation: function(){
+      var url = apiUrl + '/transaction';
       console.log("Attempting with " + url);
       return $http.get(url);
     },
